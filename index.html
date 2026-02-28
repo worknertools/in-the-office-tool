@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Type play</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIXEL_POSTER // STUDIO PRO STYLE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #F3F4F6;
+            --sidebar-bg: #F3F4F6;
+            --border-color: #D1D5DB;
+            --accent-color: #111827;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg-color); color: var(--text-main); font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; }
+
+        input[type="range"] { -webkit-appearance: none; appearance: none; background: #D1D5DB; height: 1px; width: 100%; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; background: #111; cursor: pointer; border-radius: 0; }
+
+        .color-circle-wrapper { position: relative; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border-color); overflow: hidden; flex-shrink: 0; background: #fff; }
+        input[type="color"] { position: absolute; width: 200%; height: 200%; top: -50%; left: -50%; cursor: pointer; border: none; padding: 0; background: none; }
+
+        .hex-input { font-family: 'Monaco', 'Consolas', monospace; font-size: 11px; background: transparent; border: none; width: 65px; padding: 2px 0; color: #111; outline: none; letter-spacing: 0.05em; }
+
+        .mode-dropdown {
+            -webkit-appearance: none; appearance: none; width: 100%; background: transparent; border: 1px solid var(--border-color);
+            padding: 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; outline: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M0 2l4 4 4-4z' fill='%23666'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 15px center;
+        }
+
+        .canvas-container { background: white; display: flex; align-items: center; justify-content: center; height: 85vh; max-width: 90%; aspect-ratio: 3 / 4; position: relative; }
+        canvas { width: 100%; height: 100%; object-fit: contain; }
+
+        .side-panel { background: var(--sidebar-bg); border-right: 1px solid var(--border-color); overflow-y: auto; scrollbar-width: none; }
+        .side-panel::-webkit-scrollbar { display: none; }
+
+        .btn-action { border: 1px solid #D1D5DB; font-size: 11px; letter-spacing: 0.1em; transition: all 0.2s ease; text-transform: uppercase; }
+        .btn-action:hover { background: #111; color: white; border-color: #111; }
+        .btn-active { background: #111 !important; color: white !important; border-color: #111 !important; }
+
+        .label-text { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.2em; font-weight: 600; }
+        
+        .dir-btn { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; padding: 8px 0; border: 1px solid var(--border-color); text-align: center; transition: all 0.2s; cursor: pointer; }
+        .dir-btn.active { background: #111; color: white; border-color: #111; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <aside class="side-panel w-80 h-full flex flex-col px-8 pt-4 pb-6 shrink-0">
+        <div class="flex flex-col space-y-6">
+            <section class="space-y-3">
+                <div class="flex justify-between items-baseline">
+                    <h2 class="label-text" id="t-source">Source</h2>
+                    <div class="flex gap-2 text-[10px] font-bold tracking-widest">
+                        <button onclick="setLang('en')" id="btn-en" class="hover:text-black transition-colors">EN</button>
+                        <span class="text-neutral-300">|</span>
+                        <button onclick="setLang('cn')" id="btn-cn" class="text-neutral-400 hover:text-black transition-colors">CN</button>
+                    </div>
+                </div>
+                <div class="relative group border border-dashed border-neutral-400 p-6 text-center hover:border-neutral-800 transition-colors cursor-pointer">
+                    <input type="file" id="fileIn" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    <p class="text-[10px] text-neutral-500 uppercase tracking-tighter" id="t-upload">Click to Upload</p>
+                </div>
+            </section>
+
+            <section class="space-y-4">
+                <h2 class="label-text" id="t-colors">Color System</h2>
+                <div class="grid grid-cols-2 gap-x-2 gap-y-4 mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="color-circle-wrapper"><input type="color" id="col1" value="#0064FF"></div>
+                        <input type="text" id="hex1" class="hex-input" value="#0064FF" spellcheck="false">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="color-circle-wrapper"><input type="color" id="col2" value="#00C864"></div>
+                        <input type="text" id="hex2" class="hex-input" value="#00C864" spellcheck="false">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="color-circle-wrapper"><input type="color" id="col3" value="#FF6400"></div>
+                        <input type="text" id="hex3" class="hex-input" value="#FF6400" spellcheck="false">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="color-circle-wrapper"><input type="color" id="col4" value="#FFFFFF"></div>
+                        <input type="text" id="hex4" class="hex-input" value="#FFFFFF" spellcheck="false">
+                    </div>
+                </div>
+            </section>
+
+            <section class="space-y-5">
+                <h2 class="label-text" id="t-params">Parameters</h2>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-[10px]">
+                        <span id="t-res">DENSITY</span>
+                        <span id="v_res" class="font-mono">75</span>
+                    </div>
+                    <input type="range" id="resY" min="30" max="180" value="75">
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-[10px]">
+                        <span id="t-contrast">CONTRAST</span>
+                        <span id="v_contrast" class="font-mono">1.2</span>
+                    </div>
+                    <input type="range" id="contrast" min="0.5" max="4.0" step="0.1" value="1.2">
+                </div>
+                <div class="space-y-1">
+                    <p class="text-[8px] text-neutral-400 uppercase tracking-widest mb-1" id="t-direction">Direction</p>
+                    <div class="grid grid-cols-2 gap-0">
+                        <button onclick="setDirection('vertical')" id="dir-v" class="dir-btn active">VERTICAL</button>
+                        <button onclick="setDirection('horizontal')" id="dir-h" class="dir-btn">HORIZONTAL</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="space-y-3">
+                <h2 class="label-text" id="t-mode">Style Mode</h2>
+                <div class="relative space-y-3">
+                    <select id="modeSelect" onchange="setPalette(this.value)" class="mode-dropdown">
+                        <option value="natural">IN THE OFFICE</option>
+                        <option value="ascii">ASCII Matrix</option>
+                        <option value="duo">Duo Rhythm</option>
+                        <option value="capsule">Capsule Art</option>
+                        <option value="square">Square Art</option>
+                    </select>
+                    <div id="asciiCharsGroup" class="space-y-1" style="display: none;">
+                        <p class="text-[8px] text-neutral-400 uppercase tracking-widest" id="t-ascii-label">Characters</p>
+                        <input type="text" id="asciiInput" class="hex-input w-full border-b border-neutral-300" value="■●0{}+-:. " spellcheck="false" oninput="render()">
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="label-text mb-3" id="t-export">Export</h2>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="exportJPG()" class="btn-action py-2 btn-active font-bold">JPG</button>
+                    <button onclick="exportPNG()" class="btn-action py-2 btn-active font-bold">PNG</button>
+                    <button onclick="exportSVG()" class="btn-action py-2 btn-active font-bold">SVG</button>
+                </div>
+            </section>
+        </div>
+        <footer class="mt-auto pt-6">
+            <p class="text-[9px] text-neutral-500 tracking-[0.3em]">© 2026 Design by Type play</p>
+        </footer>
+    </aside>
+
+    <main class="flex-grow flex items-center justify-center p-6 md:p-12 bg-[#E5E7EB]">
+        <div class="canvas-container" id="capture">
+            <canvas id="mainCanvas"></canvas>
+        </div>
+    </main>
+
+<script>
+    const i18n = {
+        en: { source: "Source", upload: "Click to Upload", colors: "Color System", params: "Parameters", contrast: "CONTRAST", res: "DENSITY", direction: "Direction", mode: "Style Mode", export: "Export", asciiLabel: "Characters" },
+        cn: { source: "资源文件", upload: "点击上传图片", colors: "色彩系统", params: "核心参数", contrast: "对比度", res: "像素密度", direction: "排列方向", mode: "风格模式", export: "导出文件", asciiLabel: "矩阵字符" }
+    };
+
+    let currentLang = 'en';
+    let currentDirection = 'vertical';
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    const fileIn = document.getElementById('fileIn');
+    let img = null;
+    let currentPalette = 'natural'; 
+
+    function setLang(lang) {
+        currentLang = lang;
+        const data = i18n[lang];
+        Object.keys(data).forEach(key => {
+            const el = document.getElementById('t-' + key);
+            if (el) el.innerText = data[key];
+        });
+        document.getElementById('btn-en').className = lang === 'en' ? 'text-neutral-800' : 'text-neutral-400';
+        document.getElementById('btn-cn').className = lang === 'cn' ? 'text-neutral-800' : 'text-neutral-400';
+    }
+
+    function setDirection(dir) {
+        currentDirection = dir;
+        document.getElementById('dir-v').classList.toggle('active', dir === 'vertical');
+        document.getElementById('dir-h').classList.toggle('active', dir === 'horizontal');
+        render();
+    }
+
+    for (let i = 1; i <= 4; i++) {
+        const picker = document.getElementById(`col${i}`);
+        const text = document.getElementById(`hex${i}`);
+        picker.oninput = (e) => { text.value = e.target.value.toUpperCase(); render(); };
+        text.oninput = (e) => {
+            let val = e.target.value;
+            if (!val.startsWith('#')) val = '#' + val;
+            if (/^#[0-9A-F]{6}$/i.test(val)) { picker.value = val; render(); }
+        };
+    }
+
+    ['resY', 'contrast'].forEach(id => {
+        document.getElementById(id).oninput = (e) => {
+            if(document.getElementById('v_' + id)) document.getElementById('v_' + id).innerText = e.target.value;
+            render();
+        };
+    });
+
+    function setPalette(p) {
+        currentPalette = p;
+        document.getElementById('modeSelect').value = p;
+        document.getElementById('asciiCharsGroup').style.display = p === 'ascii' ? 'block' : 'none';
+        render();
+    }
+
+    fileIn.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            img = new Image();
+            img.onload = () => render();
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    function drawContent(targetCtx, width, height, isTransparent = false) {
+        if (!img) { targetCtx.fillStyle = "#F3F4F6"; targetCtx.fillRect(0, 0, width, height); return; }
+        const resX = parseInt(document.getElementById('resY').value); 
+        const contrast = parseFloat(document.getElementById('contrast').value);
+        const resY = Math.floor(resX * (4/3));
+        const c = [document.getElementById('col1').value, document.getElementById('col2').value, document.getElementById('col3').value, document.getElementById('col4').value];
+        const rawChars = document.getElementById('asciiInput').value || " ";
+        const hasSquare = rawChars.includes('■');
+        const chars = rawChars.split("");
+
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = resX; tempCanvas.height = resY;
+        const tCtx = tempCanvas.getContext('2d');
+        const targetAspect = 3/4;
+        const imgAspect = img.width / img.height;
+        let sx, sy, sw, sh;
+        if (imgAspect > targetAspect) { sh = img.height; sw = sh * targetAspect; sx = (img.width - sw) / 2; sy = 0; }
+        else { sw = img.width; sh = sw / targetAspect; sx = 0; sy = (img.height - sh) / 2; }
+        tCtx.drawImage(img, sx, sy, sw, sh, 0, 0, resX, resY);
+        const pd = tCtx.getImageData(0, 0, resX, resY).data;
+
+        if(!isTransparent) { targetCtx.fillStyle = c[3]; targetCtx.fillRect(0, 0, width, height); }
+        else { targetCtx.clearRect(0, 0, width, height); }
+
+        const cellW = width / resX, cellH = height / resY;
+        const overlap = 0.9;
+
+        for (let y = 0; y < resY; y++) {
+            for (let x = 0; x < resX; x++) {
+                const i = (y * resX + x) * 4;
+                let br = 255;
+                if (pd[i+3] > 10) {
+                    br = (pd[i] + pd[i+1] + pd[i+2]) / 3;
+                    br = Math.max(0, Math.min(255, (br - 128) * contrast + 128));
+                }
+
+                if (currentPalette === 'ascii') {
+                    let bandColor, txtCol;
+                    if (br < 64) { bandColor = c[0]; txtCol = hasSquare ? c[1] : c[0]; }
+                    else if (br < 128) { bandColor = c[1]; txtCol = hasSquare ? c[2] : c[1]; }
+                    else if (br < 192) { bandColor = c[2]; txtCol = hasSquare ? c[0] : c[2]; }
+                    else { bandColor = c[3]; txtCol = hasSquare ? c[1] : c[3]; }
+
+                    if (hasSquare) {
+                        targetCtx.fillStyle = bandColor;
+                        targetCtx.fillRect(x * cellW, y * cellH, cellW + overlap, cellH + overlap);
+                    }
+                    const charIdx = Math.floor((br / 255) * (chars.length - 1));
+                    targetCtx.fillStyle = txtCol;
+                    targetCtx.font = `bold ${cellW * 0.75}px Monaco, Consolas, monospace`;
+                    targetCtx.textAlign = "center"; targetCtx.textBaseline = "middle";
+                    targetCtx.fillText(chars[charIdx], x * cellW + cellW/2, y * cellH + cellH/2);
+                } else if (currentPalette === 'natural') {
+                    targetCtx.fillStyle = br < 64 ? c[0] : (br < 128 ? c[1] : (br < 192 ? c[2] : c[3]));
+                    if (currentDirection === 'vertical') targetCtx.fillRect(x * cellW, y * cellH, cellW + overlap, cellH * (br / 255));
+                    else targetCtx.fillRect(x * cellW, y * cellH, cellW * (br / 255), cellH + overlap);
+                } else if (currentPalette === 'duo') {
+                    targetCtx.fillStyle = c[0];
+                    let d = 1 - (br/255);
+                    if (currentDirection === 'vertical') targetCtx.fillRect(x * cellW, y * cellH + (cellH - cellH*d)/2, cellW + overlap, cellH*d);
+                    else targetCtx.fillRect(x * cellW + (cellW - cellW*d)/2, y * cellH, cellW*d, cellH + overlap);
+                } else if (currentPalette === 'capsule') {
+                    if (br > 230) continue;
+                    targetCtx.fillStyle = c[0];
+                    targetCtx.beginPath();
+                    targetCtx.arc(x * cellW + cellW/2, y * cellH + cellH/2, (cellW * 0.8)/2, 0, Math.PI*2);
+                    targetCtx.fill();
+                } else if (currentPalette === 'square') {
+                    if (br > 245) continue;
+                    targetCtx.fillStyle = c[0];
+                    const s = Math.min(cellW, cellH) * 0.95 * (1 - br/255);
+                    targetCtx.fillRect(x * cellW + (cellW - s)/2, y * cellH + (cellH - s)/2, s, s);
+                }
+            }
+        }
+    }
+
+    function render() { canvas.width = 900; canvas.height = 1200; drawContent(ctx, 900, 1200); }
+    function exportImage(format, isTransparent) {
+        if (!img) return;
+        const ec = document.createElement('canvas'); ec.width = 2400; ec.height = 3200;
+        drawContent(ec.getContext('2d'), 2400, 3200, isTransparent);
+        const link = document.createElement('a'); link.download = `PIXEL_PLAY_${Date.now()}.${format}`;
+        link.href = ec.toDataURL(`image/${format === 'jpg' ? 'jpeg' : 'png'}`); link.click();
+    }
+    function exportJPG() { exportImage('jpg', false); }
+    function exportPNG() { exportImage('png', true); }
+
+    function exportSVG() {
+        if (!img) return;
+        const resX = parseInt(document.getElementById('resY').value), resY = Math.floor(resX * (4/3));
+        const contrast = parseFloat(document.getElementById('contrast').value);
+        const c = [document.getElementById('col1').value, document.getElementById('col2').value, document.getElementById('col3').value, document.getElementById('col4').value];
+        const rawChars = document.getElementById('asciiInput').value || " ";
+        const hasSquare = rawChars.includes('■');
+        const chars = rawChars.split("");
+        const w = 2400, h = 3200, cellW = w/resX, cellH = h/resY;
+
+        const tCtx = document.createElement('canvas').getContext('2d'); 
+        tCtx.canvas.width = resX; tCtx.canvas.height = resY;
+        const targetAspect = 3/4;
+        const imgAspect = img.width / img.height;
+        let sx, sy, sw, sh;
+        if (imgAspect > targetAspect) { sh = img.height; sw = sh * targetAspect; sx = (img.width - sw) / 2; sy = 0; }
+        else { sw = img.width; sh = sw / targetAspect; sx = 0; sy = (img.height - sh) / 2; }
+        tCtx.drawImage(img, sx, sy, sw, sh, 0, 0, resX, resY);
+        const pd = tCtx.getImageData(0, 0, resX, resY).data;
+
+        let paths = { [c[0]]: "", [c[1]]: "", [c[2]]: "", [c[3]]: "" };
+        let texts = "";
+        const bgColor = c[3].toUpperCase();
+
+        for (let y = 0; y < resY; y++) {
+            for (let x = 0; x < resX; x++) {
+                const i = (y * resX + x) * 4;
+                let br = 255;
+                if (pd[i+3] > 10) br = Math.max(0, Math.min(255, ((pd[i]+pd[i+1]+pd[i+2])/3 - 128) * contrast + 128));
+
+                if (currentPalette === 'ascii') {
+                    let bandColor, txtCol;
+                    if (br < 64) { bandColor = c[0]; txtCol = hasSquare ? c[1] : c[0]; }
+                    else if (br < 128) { bandColor = c[1]; txtCol = hasSquare ? c[2] : c[1]; }
+                    else if (br < 192) { bandColor = c[2]; txtCol = hasSquare ? c[0] : c[2]; }
+                    else { bandColor = c[3]; txtCol = hasSquare ? c[1] : c[3]; }
+
+                    if (hasSquare && bandColor.toUpperCase() !== bgColor) {
+                        paths[bandColor] += `M${x*cellW},${y*cellH}h${cellW}v${cellH}h-${cellW}z `;
+                    }
+                    const charIdx = Math.floor((br/255)*(chars.length-1));
+                    if (txtCol.toUpperCase() !== bgColor) {
+                        texts += `<text x="${x*cellW+cellW/2}" y="${y*cellH+cellH/2}" fill="${txtCol}" font-family="Monaco, monospace" font-size="${cellW*0.75}" font-weight="bold" text-anchor="middle" dominant-baseline="central">${chars[charIdx]}</text>`;
+                    }
+                } else if (currentPalette === 'natural') {
+                    let fill = br < 64 ? c[0] : (br < 128 ? c[1] : (br < 192 ? c[2] : c[3]));
+                    if (fill.toUpperCase() !== bgColor) {
+                        let rw = currentDirection === 'vertical' ? cellW : cellW * (br/255);
+                        let rh = currentDirection === 'vertical' ? cellH * (br/255) : cellH;
+                        paths[fill] += `M${x*cellW},${y*cellH}h${rw}v${rh}h-${rw}z `;
+                    }
+                } else if (currentPalette === 'duo' && c[0].toUpperCase() !== bgColor) {
+                    let d = 1 - (br/255);
+                    if (d < 0.005) continue; // 忽略极其细微的线条
+                    let rx = currentDirection === 'vertical' ? x*cellW : x*cellW + (cellW - cellW*d)/2;
+                    let ry = currentDirection === 'vertical' ? y*cellH + (cellH - cellH*d)/2 : y*cellH;
+                    let rw = currentDirection === 'vertical' ? cellW : cellW*d;
+                    let rh = currentDirection === 'vertical' ? cellH*d : cellH;
+                    paths[c[0]] += `M${rx},${ry}h${rw}v${rh}h-${rw}z `;
+                } else if (currentPalette === 'square' && br <= 245 && c[0].toUpperCase() !== bgColor) {
+                    const s = Math.min(cellW, cellH) * 0.95 * (1 - br/255);
+                    paths[c[0]] += `M${x*cellW+(cellW-s)/2},${y*cellH+(cellH-s)/2}h${s}v${s}h-${s}z `;
+                } else if (currentPalette === 'capsule' && br <= 230 && c[0].toUpperCase() !== bgColor) {
+                    const r = (cellW * 0.8)/2;
+                    const cx = x*cellW + cellW/2, cy = y*cellH + cellH/2;
+                    paths[c[0]] += `M${cx-r},${cy}a${r},${r} 0 1,0 ${r*2},0a${r},${r} 0 1,0 -${r*2},0 `;
+                }
+            }
+        }
+
+        // 添加 shape-rendering="crispEdges" 确保网格线条对齐，且没有抗锯齿空隙
+        let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges">`;
+        Object.keys(paths).forEach(color => {
+            if(paths[color]) svgContent += `<path d="${paths[color]}" fill="${color}"/>`;
+        });
+        svgContent += texts + `</svg>`;
+
+        const link = document.createElement('a'); 
+        link.href = URL.createObjectURL(new Blob([svgContent], {type: 'image/svg+xml'})); 
+        link.download = `PIXEL_PLAY_${Date.now()}.svg`; link.click();
+    }
+
+    setLang('en'); 
+    setPalette('natural'); 
+    render();
+</script>
+</body>
+</html>
+    
+  </body>
+  
+</html>
